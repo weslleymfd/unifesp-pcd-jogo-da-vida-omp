@@ -5,7 +5,7 @@
 
 #define SRAND_VALUE 1985
 #define DIM 2048
-#define GERACOES 4 //2000
+#define GERACOES 2000
 #define NTHREADS 8
 
 int **grid, **newgrid;
@@ -127,7 +127,7 @@ int main (int argc, char *argv[]) {
     newgrid = Aloca_grid ();
     Inicia_grid(grid);
 
-    printf("OMP | GERACOES: %d | THREADS: %d\n", GERACOES, NTHREADS);
+    printf("OMP-CRITICAL | GERACOES: %d | THREADS: %d\n", GERACOES, NTHREADS);
     printf("Geração inicial: %d\n", Conta_celulas_vivas(grid));
 
     k = DIM/NTHREADS;

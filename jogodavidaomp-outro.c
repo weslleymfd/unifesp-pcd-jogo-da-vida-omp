@@ -1,3 +1,4 @@
+#include <stdatomic.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -5,7 +6,7 @@
 
 #define SRAND_VALUE 1985
 #define DIM 2048
-#define GERACOES 4 //2000
+#define GERACOES 2000
 #define NTHREADS 8
 
 int **grid, **newgrid;
@@ -121,13 +122,13 @@ void Copia_grid (int **grid, int **newgrid, int a, int b) {
 
 int main (int argc, char *argv[]) {
     double inicio, fim;
-    int i, j, k, qt = 0;
+    int i, j, k;
 
     grid = Aloca_grid ();
     newgrid = Aloca_grid ();
     Inicia_grid(grid);
 
-    printf("OMP | GERACOES: %d | THREADS: %d\n", GERACOES, NTHREADS);
+    printf("OMP-OUTRO | GERACOES: %d | THREADS: %d\n", GERACOES, NTHREADS);
     printf("Geração inicial: %d\n", Conta_celulas_vivas(grid));
 
     k = DIM/NTHREADS;
@@ -135,6 +136,7 @@ int main (int argc, char *argv[]) {
     omp_set_dynamic(0);
     omp_set_num_threads(NTHREADS);
     
+    //inicio = omp_get_wtime();
     #pragma omp parallel private (i) shared (grid, newgrid)
     {
         int id = omp_get_thread_num();
@@ -147,8 +149,11 @@ int main (int argc, char *argv[]) {
             Copia_grid(grid, newgrid, a, b);
         }
     }
+     //fim = omp_get_wtime();
 
     //printf("Geração %d: %d\n", GERACOES, Conta_celulas_vivas(newgrid));
+
+    atomic_int qt = 0;
 
     inicio = omp_get_wtime();
     #pragma omp parallel for schedule(dynamic, 1) collapse (2)
