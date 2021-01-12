@@ -121,7 +121,7 @@ void Copia_grid (int **grid, int **newgrid, int a, int b) {
 
 int main (int argc, char *argv[]) {
     double inicio, fim;
-    int i, k;
+    int i, j, k, qt = 0;
 
     grid = Aloca_grid ();
     newgrid = Aloca_grid ();
@@ -135,7 +135,7 @@ int main (int argc, char *argv[]) {
     omp_set_dynamic(0);
     omp_set_num_threads(NTHREADS);
     
-    inicio = omp_get_wtime();
+    //inicio = omp_get_wtime();
     #pragma omp parallel private (i) shared (grid, newgrid)
     {
         int id = omp_get_thread_num();
@@ -148,9 +148,25 @@ int main (int argc, char *argv[]) {
             Copia_grid(grid, newgrid, a, b);
         }
     }
+    //fim = omp_get_wtime();
+
+    //printf("Geração %d: %d\n", GERACOES, Conta_celulas_vivas(newgrid));
+
+    inicio = omp_get_wtime();
+    #pragma omp parallel for schedule(dynamic, 1) collapse (2)
+    for (i = 0; i < DIM; i++) {
+        for (j = 0; j < DIM; j++) {
+            if (newgrid[i][j] == 1) {
+                #pragma omp critical
+                {
+                qt++;
+                }
+            }
+        }
+    }
     fim = omp_get_wtime();
 
-    printf("Geração %d: %d\n", GERACOES, Conta_celulas_vivas(newgrid));
+    printf("Geração %d: %d\n", GERACOES, qt);
 
     Libera_grid (newgrid);
     Libera_grid (grid);
